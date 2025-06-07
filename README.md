@@ -17,7 +17,7 @@ A minimal dark-mode, browser-based task planner that supports:
 - Notification reminders for upcoming due times
 
 ## Usage
-1. Open `to_do_goals_latest.html` in your browser.
+1. Open `to_do_goals.html` in your browser.
 2. Upload your `todo.txt` file.
 3. Tasks will be grouped by date and displayed in order.
 4. Notifications require enabling permissions in the browser.
