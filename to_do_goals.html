@@ -132,14 +132,28 @@
 
     document.getElementById('fileInput').addEventListener('change', function(event) {
       const file = event.target.files[0];
+      const container = document.getElementById('taskList');
+      const warning = document.getElementById('warning');
+      warning.textContent = '';
       if (!file) return;
 
       const reader = new FileReader();
       reader.onload = function(e) {
         const content = e.target.result;
-        localStorage.setItem('lastTasks', content);
         const tasks = parseTasks(content);
-        renderTasks(tasks);
+        if (tasks.length === 0) {
+          localStorage.removeItem('lastTasks');
+          container.innerHTML = '';
+          warning.textContent = '⚠️ Could not parse tasks';
+        } else {
+          localStorage.setItem('lastTasks', content);
+          renderTasks(tasks);
+        }
+      };
+      reader.onerror = function() {
+        localStorage.removeItem('lastTasks');
+        container.innerHTML = '';
+        warning.textContent = '⚠️ Failed to read file';
       };
       reader.readAsText(file);
     });
