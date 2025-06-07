@@ -171,8 +171,9 @@
       reader.readAsText(file);
     });
 
-    // Request notification permission if it hasn't been granted already
-    if (Notification.permission !== "granted") {
+    // Request notification permission only if status is "default"
+    // so browsers don't re-prompt users who previously denied access
+    if (Notification.permission === "default") {
       Notification.requestPermission();
     }
 
