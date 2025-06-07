@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>To Do Goals</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: #e0e0e0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 1em;
+    }
+    h1 {
+      color: #bb86fc;
+    }
+    .date-block {
+      margin-top: 2em;
+    }
+    .date-block h2 {
+      color: #bb86fc;
+      border-bottom: 1px solid #333;
+      padding-bottom: 0.2em;
+    }
+    .task {
+      margin: 0.5em 0;
+      padding: 0.5em;
+      border-left: 4px solid #bb86fc;
+      background-color: #1f1f1f;
+    }
+    .time {
+      color: #03dac6;
+      font-weight: bold;
+    }
+    .priority-A { border-left-color: #ff6f61; }
+    .priority-B { border-left-color: #fbc02d; }
+    .priority-C { border-left-color: #03a9f4; }
+    .context-home { background-color: #263238; }
+    .context-evening { background-color: #2e1534; }
+    .context-work { background-color: #1a237e; }
+    .context-unitedway { background-color: #004d40; }
+    input[type="file"] {
+      margin: 1em 0;
+    }
+    .warning {
+      color: #f44336;
+      margin-top: 1em;
+    }
+  </style>
+</head>
+<body>
+  <h1>🗂️ To Do Goals</h1>
+  <input type="file" id="fileInput" accept=".txt">
+  <div id="taskList"></div>
+  <div id="warning" class="warning"></div>
+
+  <script>
+    function parseTasks(text) {
+      return text.trim().split('\n').map(line => {
+        const match = line.match(/\((\w)\)\s+(.*?)\s+due:(\d{4}-\d{2}-\d{2})\s+time:(\d{2}:\d{2})/);
+        if (!match) return null;
+        const description = match[2];
+        const contextMatch = description.match(/@(\w+)/);
+        const context = contextMatch ? contextMatch[1] : '';
+        return {
+          priority: match[1],
+          description: description,
+          due: match[3],
+          time: match[4],
+          context: context
+        };
+      }).filter(Boolean);
+    }
+
+    function renderTasks(tasks) {
+      const container = document.getElementById('taskList');
+      const warning = document.getElementById('warning');
+      container.innerHTML = '';
+      warning.textContent = '';
+
+      const now = new Date();
+      const today = now.toISOString().split('T')[0];
+
+      const futureTasks = tasks.filter(task => task.due >= today);
+
+      if (futureTasks.length === 0) {
+        warning.textContent = '⚠️ No future tasks found. Add upcoming tasks with due:YYYY-MM-DD and time:HH:MM.';
+        return;
+      }
+
+      const grouped = {};
+      futureTasks.forEach(task => {
+        if (!grouped[task.due]) grouped[task.due] = [];
+        grouped[task.due].push(task);
+      });
+
+      Object.keys(grouped).sort().forEach(date => {
+        const block = document.createElement('div');
+        block.className = 'date-block';
+        const header = document.createElement('h2');
+        header.textContent = new Date(date).toDateString();
+        block.appendChild(header);
+
+        grouped[date].sort((a, b) => a.time.localeCompare(b.time)).forEach(task => {
+          const el = document.createElement('div');
+          el.className = `task priority-${task.priority}`;
+          if (task.context) el.classList.add(`context-${task.context.toLowerCase()}`);
+          el.innerHTML = `<span class="time">[${task.time}]</span> ${task.description}`;
+          block.appendChild(el);
+
+          const dueTime = new Date(`${task.due}T${task.time}:00`);
+          if (dueTime > now && Notification.permission === "granted") {
+            const timeout = dueTime.getTime() - now.getTime();
+            setTimeout(() => {
+              new Notification(`Task Reminder: ${task.description}`);
+            }, timeout);
+          }
+        });
+
+        container.appendChild(block);
+      });
+    }
+
+    function loadStoredTasks() {
+      const stored = localStorage.getItem('lastTasks');
+      if (stored) {
+        const tasks = parseTasks(stored);
+        renderTasks(tasks);
+      }
+    }
+
+    document.getElementById('fileInput').addEventListener('change', function(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const content = e.target.result;
+        localStorage.setItem('lastTasks', content);
+        const tasks = parseTasks(content);
+        renderTasks(tasks);
+      };
+      reader.readAsText(file);
+    });
+
+    if (Notification.permission !== "granted") {
+      Notification.requestPermission();
+    }
+
+    loadStoredTasks();
+  </script>
+</body>
+</html>
