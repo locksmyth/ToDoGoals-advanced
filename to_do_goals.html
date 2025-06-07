@@ -55,6 +55,8 @@
   <div id="warning" class="warning"></div>
 
   <script>
+    // Parse todo.txt style lines into structured task objects
+    // Expected format: (A) Description @context +project due:YYYY-MM-DD time:HH:MM
     function parseTasks(text) {
       return text.trim().split('\n').map(line => {
         const match = line.match(/(?:\((\w)\)\s+)?(.*?)\s+due:(\d{4}-\d{2}-\d{2})\s+time:(\d{2}:\d{2})/);
@@ -72,6 +74,8 @@
       }).filter(Boolean);
     }
 
+    // Render a list of tasks grouped by date and sorted by time
+    // Adds notification timers for upcoming tasks
     function renderTasks(tasks) {
       const container = document.getElementById('taskList');
       const warning = document.getElementById('warning');
@@ -124,6 +128,7 @@
       });
     }
 
+    // Restore the last uploaded task file from localStorage on load
     function loadStoredTasks() {
       const stored = localStorage.getItem('lastTasks');
       if (stored) {
@@ -132,6 +137,7 @@
       }
     }
 
+    // Handle file uploads and update localStorage with the latest tasks
     document.getElementById('fileInput').addEventListener('change', function(event) {
       const file = event.target.files[0];
       const container = document.getElementById('taskList');
@@ -160,6 +166,7 @@
       reader.readAsText(file);
     });
 
+    // Request notification permission if it hasn't been granted already
     if (Notification.permission !== "granted") {
       Notification.requestPermission();
     }
