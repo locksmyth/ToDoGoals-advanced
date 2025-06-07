@@ -57,13 +57,13 @@
   <script>
     function parseTasks(text) {
       return text.trim().split('\n').map(line => {
-        const match = line.match(/\((\w)\)\s+(.*?)\s+due:(\d{4}-\d{2}-\d{2})\s+time:(\d{2}:\d{2})/);
+        const match = line.match(/(?:\((\w)\)\s+)?(.*?)\s+due:(\d{4}-\d{2}-\d{2})\s+time:(\d{2}:\d{2})/);
         if (!match) return null;
         const description = match[2];
         const contextMatch = description.match(/@(\w+)/);
         const context = contextMatch ? contextMatch[1] : '';
         return {
-          priority: match[1],
+          priority: match[1] || '',
           description: description,
           due: match[3],
           time: match[4],
@@ -103,7 +103,8 @@
 
         grouped[date].sort((a, b) => a.time.localeCompare(b.time)).forEach(task => {
           const el = document.createElement('div');
-          el.className = `task priority-${task.priority}`;
+          el.className = 'task';
+          if (task.priority) el.classList.add(`priority-${task.priority}`);
           if (task.context) el.classList.add(`context-${task.context.toLowerCase()}`);
           el.innerHTML = `<span class="time">[${task.time}]</span> ${task.description}`;
           block.appendChild(el);

@@ -19,9 +19,15 @@ Each task must follow this structure **exactly** for it to be parsed and display
 - `due:` — Required. Date in `YYYY-MM-DD` format. Tasks with past due dates are **not shown**.
 - `time:` — Required. Time in `HH:MM` 24-hour format. Used for time sorting and notifications.
 
-### ✅ Valid Example
+### ✅ Valid Examples
+With priority:
 ```
 (A) Take Daisy to the vet @errands +pets due:2025-06-09 time:14:00
+```
+
+Without priority:
+```
+😴 Nap before shift (1h) @home +rest due:2025-06-15 time:22:00
 ```
 
 ### ❌ Invalid Examples
