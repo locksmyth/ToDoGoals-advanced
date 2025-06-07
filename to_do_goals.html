@@ -79,7 +79,7 @@
       warning.textContent = '';
 
       const now = new Date();
-      const today = now.toISOString().split('T')[0];
+      const today = new Date().toLocaleDateString('en-CA');
 
       const futureTasks = tasks.filter(task => task.due >= today);
 
@@ -98,7 +98,9 @@
         const block = document.createElement('div');
         block.className = 'date-block';
         const header = document.createElement('h2');
-        header.textContent = new Date(date).toDateString();
+        const [y, m, d] = date.split('-').map(Number);
+        const localDate = new Date(y, m - 1, d);
+        header.textContent = localDate.toDateString();
         block.appendChild(header);
 
         grouped[date].sort((a, b) => a.time.localeCompare(b.time)).forEach(task => {
