@@ -103,8 +103,8 @@
         block.className = 'date-block';
         const header = document.createElement('h2');
         const [y, m, d] = date.split('-').map(Number);
-        const localDate = new Date(y, m - 1, d);
-        header.textContent = localDate.toLocaleDateString(undefined, {
+        const utcDate = new Date(Date.UTC(y, m - 1, d));
+        header.textContent = utcDate.toLocaleDateString(undefined, {
           weekday: 'short',
           month: 'short',
           day: '2-digit',
