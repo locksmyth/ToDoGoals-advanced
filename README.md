@@ -23,15 +23,16 @@ A minimal dark-mode, browser-based task planner that supports:
 4. Notifications require enabling permissions in the browser.
 
 ## Format Support
-Tasks must follow this format:
+Tasks should include a description followed by `due:` and `time:` fields. A
+priority like `(A)` can be placed at the beginning but is optional.
 
 ```
 (A) Task description @context +project due:YYYY-MM-DD time:HH:MM
 ```
 
-Example:
+Example without priority:
 ```
-(A) Dentist appointment @health +appointments due:2025-06-09 time:13:30
+😴 Nap before shift (1h) @home +rest due:2025-06-15 time:22:00
 ```
 
 ## Notes
