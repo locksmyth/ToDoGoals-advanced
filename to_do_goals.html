@@ -46,6 +46,21 @@
       color: #f44336;
       margin-top: 1em;
     }
+    .done-btn {
+      margin-left: 0.5em;
+      padding: 0.2em 0.4em;
+      background-color: #333;
+      color: #e0e0e0;
+      border: none;
+      cursor: pointer;
+    }
+    .done-btn:hover {
+      background-color: #444;
+    }
+    .task.completed {
+      text-decoration: line-through;
+      opacity: 0.6;
+    }
   </style>
 </head>
 <body>
@@ -74,6 +89,14 @@
       }).filter(Boolean);
     }
 
+    function getCompletedTasks() {
+      return JSON.parse(localStorage.getItem('completedTasks') || '[]');
+    }
+
+    function setCompletedTasks(list) {
+      localStorage.setItem('completedTasks', JSON.stringify(list));
+    }
+
     // Render a list of tasks grouped by date and sorted by time
     // Adds notification timers for upcoming tasks
     function renderTasks(tasks) {
@@ -84,6 +107,8 @@
 
       const now = new Date();
       const today = new Date().toLocaleDateString('en-CA');
+
+      const completed = getCompletedTasks();
 
       const futureTasks = tasks.filter(task => task.due >= today);
 
@@ -117,7 +142,28 @@
           el.className = 'task';
           if (task.priority) el.classList.add(`priority-${task.priority}`);
           if (task.context) el.classList.add(`context-${task.context.toLowerCase()}`);
+          const id = `${task.due}_${task.time}_${task.description}`;
           el.innerHTML = `<span class="time">[${task.time}]</span> ${task.description}`;
+
+          const btn = document.createElement('button');
+          btn.className = 'done-btn';
+          btn.textContent = completed.includes(id) ? 'Undo' : 'Done';
+          if (completed.includes(id)) el.classList.add('completed');
+          btn.addEventListener('click', () => {
+            const list = getCompletedTasks();
+            const index = list.indexOf(id);
+            if (index === -1) {
+              list.push(id);
+              el.classList.add('completed');
+              btn.textContent = 'Undo';
+            } else {
+              list.splice(index, 1);
+              el.classList.remove('completed');
+              btn.textContent = 'Done';
+            }
+            setCompletedTasks(list);
+          });
+          el.appendChild(btn);
           block.appendChild(el);
 
           const dueTime = new Date(`${task.due}T${task.time}:00`);
