@@ -83,9 +83,15 @@
 
   <script>
     // Parse todo.txt style lines into structured task objects
+    // Recognizes optional leading "x" for completed tasks
     // Expected format: (A) Description @context +project due:YYYY-MM-DD time:HH:MM
     function parseTasks(text) {
       return text.trim().split('\n').map(line => {
+        let done = false;
+        if (line.startsWith('x ')) {
+          done = true;
+          line = line.slice(2).trim();
+        }
         const match = line.match(/(?:\((\w)\)\s+)?(.*?)\s+due:(\d{4}-\d{2}-\d{2})\s+time:(\d{2}:\d{2})/);
         if (!match) return null;
         const description = match[2];
@@ -96,7 +102,8 @@
           description: description,
           due: match[3],
           time: match[4],
-          context: context
+          context: context,
+          done: done
         };
       }).filter(Boolean);
     }
@@ -199,6 +206,14 @@
       const stored = localStorage.getItem('lastTasks');
       if (stored) {
         const tasks = parseTasks(stored);
+        const completed = getCompletedTasks();
+        tasks.forEach(t => {
+          if (t.done) {
+            const id = `${t.due}_${t.time}_${t.description}`;
+            if (!completed.includes(id)) completed.push(id);
+          }
+        });
+        setCompletedTasks(completed);
         renderTasks(tasks);
       }
     }
@@ -221,6 +236,14 @@
           warning.textContent = '⚠️ Could not parse tasks';
         } else {
           localStorage.setItem('lastTasks', content);
+          const completed = getCompletedTasks();
+          tasks.forEach(t => {
+            if (t.done) {
+              const id = `${t.due}_${t.time}_${t.description}`;
+              if (!completed.includes(id)) completed.push(id);
+            }
+          });
+          setCompletedTasks(completed);
           renderTasks(tasks);
         }
       };
