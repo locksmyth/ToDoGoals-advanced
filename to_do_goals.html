@@ -57,6 +57,17 @@
     .done-btn:hover {
       background-color: #444;
     }
+    #exportBtn {
+      margin-left: 0.5em;
+      padding: 0.2em 0.4em;
+      background-color: #333;
+      color: #e0e0e0;
+      border: none;
+      cursor: pointer;
+    }
+    #exportBtn:hover {
+      background-color: #444;
+    }
     .task.completed {
       text-decoration: line-through;
       opacity: 0.6;
@@ -66,14 +77,21 @@
 <body>
   <h1>🗂️ To Do Goals</h1>
   <input type="file" id="fileInput" accept=".txt">
+  <button id="exportBtn">Export to todo.txt</button>
   <div id="taskList"></div>
   <div id="warning" class="warning"></div>
 
   <script>
     // Parse todo.txt style lines into structured task objects
+    // Recognizes optional leading "x" for completed tasks
     // Expected format: (A) Description @context +project due:YYYY-MM-DD time:HH:MM
     function parseTasks(text) {
       return text.trim().split('\n').map(line => {
+        let done = false;
+        if (line.startsWith('x ')) {
+          done = true;
+          line = line.slice(2).trim();
+        }
         const match = line.match(/(?:\((\w)\)\s+)?(.*?)\s+due:(\d{4}-\d{2}-\d{2})\s+time:(\d{2}:\d{2})/);
         if (!match) return null;
         const description = match[2];
@@ -84,7 +102,8 @@
           description: description,
           due: match[3],
           time: match[4],
-          context: context
+          context: context,
+          done: done
         };
       }).filter(Boolean);
     }
@@ -93,14 +112,17 @@
       return JSON.parse(localStorage.getItem('completedTasks') || '[]');
     }
 
-    function setCompletedTasks(list) {
-      localStorage.setItem('completedTasks', JSON.stringify(list));
-    }
+  function setCompletedTasks(list) {
+    localStorage.setItem('completedTasks', JSON.stringify(list));
+  }
+
+  let currentTasks = [];
 
     // Render a list of tasks grouped by date and sorted by time
     // Adds notification timers for upcoming tasks
-    function renderTasks(tasks) {
-      const container = document.getElementById('taskList');
+  function renderTasks(tasks) {
+    currentTasks = tasks;
+    const container = document.getElementById('taskList');
       const warning = document.getElementById('warning');
       container.innerHTML = '';
       warning.textContent = '';
@@ -184,6 +206,14 @@
       const stored = localStorage.getItem('lastTasks');
       if (stored) {
         const tasks = parseTasks(stored);
+        const completed = getCompletedTasks();
+        tasks.forEach(t => {
+          if (t.done) {
+            const id = `${t.due}_${t.time}_${t.description}`;
+            if (!completed.includes(id)) completed.push(id);
+          }
+        });
+        setCompletedTasks(completed);
         renderTasks(tasks);
       }
     }
@@ -206,6 +236,14 @@
           warning.textContent = '⚠️ Could not parse tasks';
         } else {
           localStorage.setItem('lastTasks', content);
+          const completed = getCompletedTasks();
+          tasks.forEach(t => {
+            if (t.done) {
+              const id = `${t.due}_${t.time}_${t.description}`;
+              if (!completed.includes(id)) completed.push(id);
+            }
+          });
+          setCompletedTasks(completed);
           renderTasks(tasks);
         }
       };
@@ -215,6 +253,23 @@
         warning.textContent = '⚠️ Failed to read file';
       };
       reader.readAsText(file);
+    });
+
+    document.getElementById('exportBtn').addEventListener('click', function() {
+      if (currentTasks.length === 0) return;
+      const completed = getCompletedTasks();
+      const lines = currentTasks.map(task => {
+        const id = `${task.due}_${task.time}_${task.description}`;
+        const prefix = completed.includes(id) ? 'x ' : '';
+        const priority = task.priority ? `(${task.priority}) ` : '';
+        return `${prefix}${priority}${task.description} due:${task.due} time:${task.time}`;
+      });
+      const blob = new Blob([lines.join('\n')], {type: 'text/plain'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'todo.txt';
+      a.click();
+      URL.revokeObjectURL(a.href);
     });
 
     // Request notification permission only if status is "default"
