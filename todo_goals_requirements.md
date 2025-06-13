@@ -58,6 +58,8 @@ Task with incorrect date format due:06-09-2025
 ## 🔔 Notifications
 - Triggered for tasks with `due:` date equal to today and future `time:`.
 - Only work if browser notification permissions are granted.
+- When opened over HTTPS or on `localhost`, a service worker schedules future reminders so they appear even after closing the page.
+- If loaded from an insecure origin (e.g. `file://`), reminders only fire while the tab remains open.
 
 ---
 

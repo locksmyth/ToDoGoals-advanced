@@ -8,6 +8,7 @@ A minimal dark-mode, browser-based task planner that supports:
 - Task priority coloring via `(A)`, `(B)`, etc.
 - Support for loading from file and storing locally
 - Browser notifications for upcoming tasks
+- Persistent reminders via a service worker when loaded over HTTPS or on `localhost`
 
 ## Features
 - Only shows **today and future** tasks
@@ -22,6 +23,7 @@ A minimal dark-mode, browser-based task planner that supports:
 2. Upload your `todo.txt` file.
 3. Tasks will be grouped by date and displayed in order.
 4. Notifications require enabling permissions in the browser.
+5. For persistent reminders after closing the page, open the planner from a secure origin (`https:` or `http://localhost`).
 
 ## Format Support
 Tasks should include a description followed by `due:` and `time:` fields. A

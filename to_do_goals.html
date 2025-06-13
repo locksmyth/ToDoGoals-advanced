@@ -118,6 +118,29 @@
 
   let currentTasks = [];
 
+  let swRegistered = false;
+  if ('serviceWorker' in navigator) {
+    const secure = location.protocol === 'https:' ||
+                   (location.protocol === 'http:' && location.hostname === 'localhost');
+    if (secure) {
+      navigator.serviceWorker.register('service-worker.js').then(() => {
+        return navigator.serviceWorker.ready;
+      }).then(() => {
+        swRegistered = true;
+        if (currentTasks.length) sendTasksToWorker(currentTasks);
+      }).catch(err => {
+        console.warn('Service worker registration failed', err);
+      });
+    }
+  }
+
+  function sendTasksToWorker(tasks) {
+    if (!swRegistered || !navigator.serviceWorker.controller) return;
+    const now = new Date();
+    const future = tasks.filter(t => new Date(`${t.due}T${t.time}:00`) > now);
+    navigator.serviceWorker.controller.postMessage({type: 'schedule', tasks: future});
+  }
+
     // Render a list of tasks grouped by date and sorted by time
     // Adds notification timers for upcoming tasks
   function renderTasks(tasks) {
@@ -189,7 +212,7 @@
           block.appendChild(el);
 
           const dueTime = new Date(`${task.due}T${task.time}:00`);
-          if (dueTime > now && Notification.permission === "granted") {
+          if (!swRegistered && dueTime > now && Notification.permission === "granted") {
             const timeout = dueTime.getTime() - now.getTime();
             setTimeout(() => {
               new Notification(`Task Reminder: ${task.description}`);
@@ -199,6 +222,7 @@
 
         container.appendChild(block);
       });
+      if (swRegistered) sendTasksToWorker(futureTasks);
     }
 
     // Restore the last uploaded task file from localStorage on load
