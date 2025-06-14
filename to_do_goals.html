@@ -68,10 +68,13 @@
     #exportBtn:hover {
       background-color: #444;
     }
-    .task.completed {
-      text-decoration: line-through;
-      opacity: 0.6;
-    }
+      .task.completed {
+        text-decoration: line-through;
+        opacity: 0.6;
+      }
+      .task.expired {
+        color: #f44336;
+      }
   </style>
 </head>
 <body>
@@ -182,13 +185,23 @@
         });
         block.appendChild(header);
 
-        grouped[date].sort((a, b) => a.time.localeCompare(b.time)).forEach(task => {
-          const el = document.createElement('div');
-          el.className = 'task';
-          if (task.priority) el.classList.add(`priority-${task.priority}`);
-          if (task.context) el.classList.add(`context-${task.context.toLowerCase()}`);
-          const id = `${task.due}_${task.time}_${task.description}`;
-          el.innerHTML = `<span class="time">[${task.time}]</span> ${task.description}`;
+          grouped[date].sort((a, b) => a.time.localeCompare(b.time)).forEach(task => {
+            const el = document.createElement('div');
+            el.className = 'task';
+            if (task.priority) el.classList.add(`priority-${task.priority}`);
+            if (task.context) el.classList.add(`context-${task.context.toLowerCase()}`);
+            const id = `${task.due}_${task.time}_${task.description}`;
+            const dueTime = new Date(`${task.due}T${task.time}:00`);
+            if (dueTime <= now && !completed.includes(id)) {
+              el.classList.add('expired');
+            } else if (dueTime > now) {
+              setTimeout(() => {
+                if (!el.classList.contains('completed')) {
+                  el.classList.add('expired');
+                }
+              }, dueTime.getTime() - now.getTime());
+            }
+            el.innerHTML = `<span class="time">[${task.time}]</span> ${task.description}`;
 
           const btn = document.createElement('button');
           btn.className = 'done-btn';
@@ -200,18 +213,21 @@
             if (index === -1) {
               list.push(id);
               el.classList.add('completed');
+              el.classList.remove('expired');
               btn.textContent = 'Undo';
             } else {
               list.splice(index, 1);
               el.classList.remove('completed');
               btn.textContent = 'Done';
+              if (dueTime <= new Date()) {
+                el.classList.add('expired');
+              }
             }
             setCompletedTasks(list);
           });
           el.appendChild(btn);
           block.appendChild(el);
 
-          const dueTime = new Date(`${task.due}T${task.time}:00`);
           if (!swRegistered && dueTime > now && Notification.permission === "granted") {
             const timeout = dueTime.getTime() - now.getTime();
             setTimeout(() => {

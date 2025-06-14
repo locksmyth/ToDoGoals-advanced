@@ -17,6 +17,7 @@ A minimal dark-mode, browser-based task planner that supports:
 - Automatically saves your last file to local storage
 - Notification reminders for upcoming due times
 - Mark tasks as done with a button
+- Overdue tasks turn red until completed
 
 ## Usage
 1. Open `to_do_goals.html` in your browser.
