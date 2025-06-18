@@ -44,6 +44,13 @@ Example without priority:
 - Tasks are stored locally between sessions
 - Notifications appear based on `due:` and `time:` fields
 
+## Hosting on Ubuntu
+To host the planner on an Ubuntu server:
+1. Install a web server such as **nginx** or, for quick tests, run `python3 -m http.server`.
+2. Copy the repository files (e.g., `index.html`, `to_do_goals.html`, and `service-worker.js`) into your web root, often `/var/www/html` for nginx.
+3. Enable HTTPS so the service worker can schedule persistent reminders. Tools like **Let's Encrypt** make it easy to obtain free certificates.
+4. For local development you can simply use `http://localhost`, which counts as a secure origin for service workers.
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
