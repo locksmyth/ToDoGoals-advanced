@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: #e0e0e0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 1em;
+    }
+    input {
+      margin: 0.5em 0;
+      background-color: #1e1e1e;
+      border: 1px solid #333;
+      color: #e0e0e0;
+      padding: 0.5em;
+    }
+    button {
+      background-color: #bb86fc;
+      border: none;
+      padding: 0.5em 1em;
+      color: #000;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Login</h1>
+  <form method="POST" action="/login">
+    <div>
+      <label>Username:<br>
+      <input type="text" name="username" required></label>
+    </div>
+    <div>
+      <label>Password:<br>
+      <input type="password" name="password" required></label>
+    </div>
+    <button type="submit">Login</button>
+  </form>
+  <div id="error" style="color:#f44336;"></div>
+  <script>
+    const params = new URLSearchParams(location.search);
+    if (params.get('error')) {
+      document.getElementById('error').textContent = 'Invalid credentials';
+    }
+  </script>
+</body>
+</html>
