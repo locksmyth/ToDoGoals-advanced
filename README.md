@@ -51,6 +51,19 @@ To host the planner on an Ubuntu server:
 3. Enable HTTPS so the service worker can schedule persistent reminders. Tools like **Let's Encrypt** make it easy to obtain free certificates.
 4. For local development you can simply use `http://localhost`, which counts as a secure origin for service workers.
 
+## Server-side Login
+This repository now includes a small Node.js server that provides a
+basic login system. To start the server run:
+
+```bash
+node server.js
+```
+
+The default credentials are `admin` / `admin`. After starting the server
+navigate to `http://localhost:3000` and log in. The planner will only be
+accessible once logged in, and the session persists across page reloads
+until you log out.
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
