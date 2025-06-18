@@ -43,3 +43,7 @@ Example without priority:
 - Works fully offline
 - Tasks are stored locally between sessions
 - Notifications appear based on `due:` and `time:` fields
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
